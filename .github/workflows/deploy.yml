@@ -26,17 +26,17 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24 # Updated to 24 to remove deprecation warning
           cache: 'npm'
 
       - name: Install project dependencies
-        run: npm ci
+        run: npm install # Changed to install to prevent missing lockfile crashes
+
+      - name: Compile TanStack Start project
+        run: npm run build # Restored the missing build execution step
 
       - name: Inject 404 fallback for routing safety
-        run:   find .output/public -name "index.html" -exec cp {} .output/public/404.html \; -quit
-
-      - name: Inject 404 fallback for routing safety
-        run: cp .output/public/index.html .output/public/404.html
+        run: cp dist/index.html dist/404.html # Target standard dist output folder
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -44,7 +44,7 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.output/public' # Points directly to TanStack Start's static folder
+          path: 'dist' # Points directly to your compiled build folder
 
       - name: Deploy to GitHub Pages Production
         id: deployment
