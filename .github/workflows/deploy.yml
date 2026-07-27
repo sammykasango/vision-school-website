@@ -35,31 +35,8 @@ jobs:
       - name: Compile TanStack Start project
         run: npm run build
 
-      - name: Generate Static Pages Shell
-        run: |
-          # 1. Create a dedicated clean deployment directory
-          mkdir -p gh-pages-branch
-          
-          # 2. Inject your clean portfolio routing shell directly into it
-          cat << 'EOF' > gh-pages-branch/index.html
-          <!DOCTYPE html>
-          <html lang="en">
-            <head>
-              <meta charset="UTF-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-              <meta name="google-site-verification" content="YOUR_ACTUAL_VERIFICATION_STRING_HERE" />
-              <link rel="icon" type="image/x-icon" href="https://github.io">
-              <title>Vision Kindergarten & Primary School</title>
-            </head>
-            <body>
-              <div id="root"></div>
-              <script type="module" src="/src/main.tsx"></script>
-            </body>
-          </html>
-          EOF
-          
-          # 3. Duplicate it for browser refresh security
-          cp gh-pages-branch/index.html gh-pages-branch/404.html
+      - name: Inject 404 fallback for routing safety
+        run: cp dist/client/index.html dist/client/404.html # 👈 Targets the real compiled index.html
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -67,7 +44,7 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'gh-pages-branch' # 👈 Point explicitly to our freshly made clean directory
+          path: 'dist/client' 
 
       - name: Deploy to GitHub Pages Production
         id: deployment
