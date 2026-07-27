@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: 'main' # Triggers the build every time you push changes to main
+    branches: 'main'
 
 permissions:
   contents: read
@@ -26,17 +26,29 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # Clear deprecation warnings with modern environments
+          node-version: 24
           cache: 'npm'
 
       - name: Install project dependencies
-        run: npm install # Safely resolve packages without hitting strict lockfile crashes
+        run: npm install
 
       - name: Compile TanStack Start project
         run: npm run build
 
-      - name: Dynamic Shell Creator for GitHub Pages Compatibility
-        run: mkdir -p dist && echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="google-site-verification" content="YOUR_ACTUAL_VERIFICATION_STRING_HERE" /><link rel="icon" type="image/x-icon" href="https://github.io"><title>Vision Kindergarten & Primary School</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html && cp dist/index.html dist/404.html
+      - name: Inject 404 fallback for routing safety
+        run: |
+          # Dynamically search the true output folder for your compiled entry shell
+          ENTRY_FILE=$(find .output/public -name "index.html" -o -name "_shell.html" | head -n 1)
+          if [ -n "$ENTRY_FILE" ]; then
+            cp "$ENTRY_FILE" .output/public/404.html
+            # If the entry point isn't named index.html at the root level, make a copy of it there too
+            if [ "$ENTRY_FILE" != ".output/public/index.html" ]; then
+              cp "$ENTRY_FILE" .output/public/index.html
+            fi
+            echo "Successfully mapped framework entry points."
+          else
+            echo "Warning: Entry files not discovered."
+          fi
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -44,7 +56,7 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist' # Point straight to the custom target asset directory
+          path: '.output/public' # 👈 Point straight to your framework's actual compiled code
 
       - name: Deploy to GitHub Pages Production
         id: deployment
