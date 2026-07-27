@@ -26,17 +26,17 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # Updated to 24 to remove deprecation warning
+          node-version: 24 # Clear deprecation warnings with modern environments
           cache: 'npm'
 
       - name: Install project dependencies
-        run: npm install # Changed to install to prevent missing lockfile crashes
+        run: npm install # Safely resolve packages without hitting strict lockfile crashes
 
       - name: Compile TanStack Start project
-        run: npm run build # Restored the missing build execution step
+        run: npm run build
 
-      - name: Inject 404 fallback for routing safety
-        run: cp dist/index.html dist/404.html # Target standard dist output folder
+      - name: Dynamic Shell Creator for GitHub Pages Compatibility
+        run: mkdir -p dist && echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="google-site-verification" content="YOUR_ACTUAL_VERIFICATION_STRING_HERE" /><link rel="icon" type="image/x-icon" href="https://github.io"><title>Vision Kindergarten & Primary School</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html && cp dist/index.html dist/404.html
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -44,7 +44,7 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist' # Points directly to your compiled build folder
+          path: 'dist' # Point straight to the custom target asset directory
 
       - name: Deploy to GitHub Pages Production
         id: deployment
