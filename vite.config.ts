@@ -32,7 +32,24 @@ function patchTanStackOptimizeDeps() {
 }
 
 export default defineConfig(({ command }) => ({
-  plugins: [tanstackStart(), patchTanStackOptimizeDeps(), react(), tsconfigPaths(), tailwindcss(), cloudflare()],
+  // 1. Tell Vite to resolve all structural and asset paths relative to your repo path
+  base: "/vision-school-website/", 
+
+  plugins: [
+    // 2. Change TanStack Start target to static and turn on crawl-based pre-rendering
+    tanstackStart({
+      target: "static",
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+      }
+    }), 
+    patchTanStackOptimizeDeps(), 
+    react(), 
+    tsconfigPaths(), 
+    tailwindcss(), 
+    cloudflare()
+  ],
   optimizeDeps: {
     exclude: [
       "@tanstack/start-server-core",
