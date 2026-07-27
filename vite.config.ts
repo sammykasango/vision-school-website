@@ -32,11 +32,10 @@ function patchTanStackOptimizeDeps() {
 }
 
 export default defineConfig(({ command }) => ({
-  // 1. Tell Vite to resolve all structural and asset paths relative to your repo path
-  base: "/vision-school-website/", 
+  // 1. 👇 Reset base to root domain so Netlify can find your CSS and JS bundles
+  base: "/", 
 
   plugins: [
-    // 2. Change TanStack Start target to static and turn on crawl-based pre-rendering
     tanstackStart({
       target: "static",
       prerender: {

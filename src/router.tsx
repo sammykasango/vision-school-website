@@ -10,7 +10,9 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-    basepath: "/vision-school-website",
+    
+    // 👇 Reset back to root domain to match Netlify's serving infrastructure
+    basepath: "/",
   });
 
   return router;
