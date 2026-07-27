@@ -35,20 +35,31 @@ jobs:
       - name: Compile TanStack Start project
         run: npm run build
 
-      - name: Inject 404 fallback for routing safety
+      - name: Generate Static Pages Shell
         run: |
-          # Dynamically search the true output folder for your compiled entry shell
-          ENTRY_FILE=$(find .output/public -name "index.html" -o -name "_shell.html" | head -n 1)
-          if [ -n "$ENTRY_FILE" ]; then
-            cp "$ENTRY_FILE" .output/public/404.html
-            # If the entry point isn't named index.html at the root level, make a copy of it there too
-            if [ "$ENTRY_FILE" != ".output/public/index.html" ]; then
-              cp "$ENTRY_FILE" .output/public/index.html
-            fi
-            echo "Successfully mapped framework entry points."
-          else
-            echo "Warning: Entry files not discovered."
-          fi
+          # 1. Create a dedicated clean deployment directory
+          mkdir -p gh-pages-branch
+          
+          # 2. Inject your clean portfolio routing shell directly into it
+          cat << 'EOF' > gh-pages-branch/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <meta name="google-site-verification" content="YOUR_ACTUAL_VERIFICATION_STRING_HERE" />
+              <link rel="icon" type="image/x-icon" href="https://github.io">
+              <title>Vision Kindergarten & Primary School</title>
+            </head>
+            <body>
+              <div id="root"></div>
+              <script type="module" src="/src/main.tsx"></script>
+            </body>
+          </html>
+          EOF
+          
+          # 3. Duplicate it for browser refresh security
+          cp gh-pages-branch/index.html gh-pages-branch/404.html
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -56,7 +67,7 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.output/public' # 👈 Point straight to your framework's actual compiled code
+          path: 'gh-pages-branch' # 👈 Point explicitly to our freshly made clean directory
 
       - name: Deploy to GitHub Pages Production
         id: deployment
