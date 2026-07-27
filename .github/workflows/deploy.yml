@@ -33,13 +33,7 @@ jobs:
         run: npm ci
 
       - name: Inject 404 fallback for routing safety
-        run:  FIRST_HTML=$(find .output/public -name "index.html" | head -n 1)
-          if [ -n "$FIRST_HTML" ]; then
-            cp "$FIRST_HTML" .output/public/404.html
-            echo "Successfully created 404.html fallback from $FIRST_HTML"
-          else
-            echo "Warning: No index.html found to clone."
-          fi
+        run:   find .output/public -name "index.html" -exec cp {} .output/public/404.html \; -quit
 
       - name: Inject 404 fallback for routing safety
         run: cp .output/public/index.html .output/public/404.html
