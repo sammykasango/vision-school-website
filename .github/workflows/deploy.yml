@@ -35,29 +35,18 @@ jobs:
       - name: Compile Portfolio Project
         run: npm run build
 
-      # 👇 Creates the routing safety fallback right inside the compilation bundle
+      # 👇 Fixed: Copies your root index.html straight to root 404.html without subfolders
       - name: Inject 404 SPA fallback Routing Hook
-        run: |
-          if [ -d "dist" ]; then
-            cp dist/index.html dist/404.html
-          elif [ -d "build" ]; then
-            cp build/index.html build/404.html
-          else
-            cp index.html 404.html || true
-          fi
+        run: cp index.html 404.html
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
 
-      # 👇 Uploads the correct folder structure explicitly
+      # 👇 Fixed: Uploads your root folder directly where all your real site files sit
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: |
-            dist
-            build
-            .
-          if-no-files-found: ignore
+          path: '.'
 
       - name: Deploy to GitHub Pages Production
         id: deployment
