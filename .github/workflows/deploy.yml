@@ -5,7 +5,7 @@ on:
     branches: 'main'
 
 permissions:
-  contents: write # Granted write access to update portfolio branch files
+  contents: write
   pages: write
   id-token: write
 
@@ -35,28 +35,29 @@ jobs:
       - name: Compile Portfolio Project
         run: npm run build
 
+      # 👇 Creates the routing safety fallback right inside the compilation bundle
       - name: Inject 404 SPA fallback Routing Hook
         run: |
-          # Finds your compiled index.html file and clones it to 404.html for routing protection
           if [ -d "dist" ]; then
             cp dist/index.html dist/404.html
-            echo "Successfully generated dist 404 handler."
           elif [ -d "build" ]; then
             cp build/index.html build/404.html
-            echo "Successfully generated build 404 handler."
           else
             cp index.html 404.html || true
-            echo "Standard fallback rule initiated."
           fi
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
 
+      # 👇 Uploads the correct folder structure explicitly
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          # Automatically detects your compiled folder location to send code straight to the server
-          path: ${{ ee.env.DEST_DIR || (directory-exists('dist') && 'dist' || (directory-exists('build') && 'build' || '.')) }}
+          path: |
+            dist
+            build
+            .
+          if-no-files-found: ignore
 
       - name: Deploy to GitHub Pages Production
         id: deployment
