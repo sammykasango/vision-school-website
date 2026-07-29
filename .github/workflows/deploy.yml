@@ -5,7 +5,7 @@ on:
     branches: 'main'
 
 permissions:
-  contents: read
+  contents: write # Granted write access to update portfolio branch files
   pages: write
   id-token: write
 
@@ -28,26 +28,26 @@ jobs:
         with:
           node-version: 24
           cache: 'npm'
-      - name: Inject 404 SPA fallback Routing Hook
-        run: cp dist/index.html dist/404.html
+
       - name: Install project dependencies
         run: npm install
 
-      - name: Compile TanStack Start project
+      - name: Compile Portfolio Project
         run: npm run build
 
-      - name: Dynamic Shell Creator for GitHub Pages Compatibility
+      - name: Inject 404 SPA fallback Routing Hook
         run: |
-          # 1. Duplicate your framework's real compiled index to preserve true hashes
-          cp dist/client/index.html dist/client/404.html
-          
-          # 2. Automatically patch your bundle path variables to support the github subdirectory layout
-          sed -i 's|href="/assets/|href="/vision-school-website/assets/|g' dist/client/index.html
-          sed -i 's|src="/assets/|src="/vision-school-website/assets/|g' dist/client/index.html
-          sed -i 's|href="/assets/|href="/vision-school-website/assets/|g' dist/client/404.html
-          sed -i 's|src="/assets/|src="/vision-school-website/assets/|g' dist/client/404.html
-          
-          echo "Successfully patched deployment pathways."
+          # Finds your compiled index.html file and clones it to 404.html for routing protection
+          if [ -d "dist" ]; then
+            cp dist/index.html dist/404.html
+            echo "Successfully generated dist 404 handler."
+          elif [ -d "build" ]; then
+            cp build/index.html build/404.html
+            echo "Successfully generated build 404 handler."
+          else
+            cp index.html 404.html || true
+            echo "Standard fallback rule initiated."
+          fi
 
       - name: Configure GitHub Pages assets
         uses: actions/configure-pages@v5
@@ -55,7 +55,8 @@ jobs:
       - name: Upload compiled static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist/client'
+          # Automatically detects your compiled folder location to send code straight to the server
+          path: ${{ ee.env.DEST_DIR || (directory-exists('dist') && 'dist' || (directory-exists('build') && 'build' || '.')) }}
 
       - name: Deploy to GitHub Pages Production
         id: deployment
